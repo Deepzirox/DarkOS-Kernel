@@ -1,6 +1,6 @@
 // BUFFER HEIGHT AND WIDTH OF BUFFER
-const BUFFER_HEIGHT: usize = 25;
-const BUFFER_WIDTH: usize = 80;
+pub const BUFFER_HEIGHT: usize = 25;
+pub const BUFFER_WIDTH: usize = 80;
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)] // derive traits
 #[repr(u8)] // accept u8
@@ -71,14 +71,15 @@ pub struct WriteVGA{
         pub fn putchar(&mut self, ch: char){
             match ch {
                 '\n' => {
-                    self.line += 1;
-                    self.col = 1;
+                    self.new_line();
                 },
                 _ => {
-                    if self.col == (BUFFER_WIDTH - 1) as i32 {
-                        self.line += 1; self.col = 1;
+                    if self.col >= BUFFER_WIDTH as i32 {
+                        self.new_line();
                     }
-                    self.vga_buff.chars[self.line as usize][self.col as usize] = ScreenChar {
+                    let row = BUFFER_HEIGHT - 1;
+                    let col = self.col;
+                    self.vga_buff.chars[row as usize][col as usize] = ScreenChar {
                         ascii_character: ch as u8,
                         color_code: self.color
                     };
@@ -89,6 +90,25 @@ pub struct WriteVGA{
         pub fn print(&mut self, buff: &str) {
             for ch in buff.chars() {
                 self.putchar(ch);
+            }
+        }
+        fn new_line(&mut self) {
+            for row in 1..BUFFER_HEIGHT {
+                for col in 0..BUFFER_WIDTH {
+                    let character = self.vga_buff.chars[row][col];
+                    self.vga_buff.chars[row - 1][col] = character;
+                }
+            }
+            self.clear_row(BUFFER_HEIGHT - 1);
+            self.col = 0;
+        }
+        fn clear_row(&mut self, row: usize){
+            let blank = ScreenChar {
+                ascii_character: b' ',
+                color_code: self.color,
+            };
+            for col in 0..BUFFER_WIDTH {
+                self.vga_buff.chars[row][col] = blank;
             }
         }
  }

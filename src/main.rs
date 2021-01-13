@@ -26,13 +26,14 @@ fn panic(_info: &PanicInfo) -> ! {
 fn welcome_kernel(){
     let mut writer = vga::WriteVGA {
         color: ColorChar::new_color(vga::Color::Green, vga::Color::Blue),
-        line: 1,
-        col: 1,
+        line: (vga::BUFFER_HEIGHT - 1) as i32,
+        col: 0,
         vga_buff:  unsafe{&mut *(0xb8000 as *mut vga::Buffer)}
     };
     vga::ColorChar::fill_background(1);
-     write!(writer, "
+    write!(writer, "
     DARK OS - Kernel\n\n
+
     Explicit is better than implicit
     Avoid unsafe code. Failing that, encapsulate it
     Things that need not change shouldn't
@@ -40,5 +41,12 @@ fn welcome_kernel(){
     This isn't finished
 
     Allocs:
-    Writer->WriterVGA: {:p}",  &writer as *const _).unwrap();
+    Writer->WriterVGA: {:p}
+    
+    
+    
+    
+    
+    ",  &writer as *const _).unwrap();
+
 }
